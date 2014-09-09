@@ -1,3 +1,8 @@
+/*
+    PROGRAM: question02.CPP
+    Written by Bruno Paulino
+    This program calculates if one date is a magic dates
+*/
 #include <iostream>
 using namespace std;
 

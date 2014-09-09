@@ -1,3 +1,8 @@
+/*
+    PROGRAM: question05.CPP
+    Written by Bruno Paulino
+    This program creates a spectral analysis
+*/
 #include <iostream>
 using namespace std;
 

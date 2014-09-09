@@ -1,3 +1,8 @@
+/*
+    PROGRAM: question04.CPP
+    Written by Bruno Paulino
+    This program calculates the total bank charges per month
+*/
 #include <iostream>
 using namespace std;
 

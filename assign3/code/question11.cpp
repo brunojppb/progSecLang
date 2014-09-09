@@ -1,3 +1,10 @@
+/*
+    PROGRAM: question11.CPP
+    Written by Bruno Paulino
+    This program creates a Graph Bar Chart of sales
+*/
+
+
 #include <iostream>
 using namespace std;
 
@@ -16,30 +23,35 @@ int main(){
   cout << "Enter today’s sales for store 5: ";
   cin >> sales5;
 
-  cout << "SALES BAR CHART:\n";
-  cout << "(Each * = $100)\n";
+  if((sales1 > 0) && (sales2 > 0) && (sales3 > 0) && (sales4 > 0) && (sales5 > 0)){
+      cout << "SALES BAR CHART:\n";
+      cout << "(Each * = $100)\n";
 
-  cout << "Store 1: ";
-  for(int i = 0; i < (sales1/100); i++){
-    cout << "*";
-  }
-  cout << "\nStore 2: ";
-  for(int i = 0; i < (sales2/100); i++){
-    cout << "*";
-  }
-  cout << "\nStore 3: ";
-  for(int i = 0; i < (sales3/100); i++){
-    cout << "*";
-  }
-  cout << "\nStore 4: ";
-  for(int i = 0; i < (sales4/100); i++){
-    cout << "*";
-  }
-  cout << "\nStore 5: ";
-  for(int i = 0; i < (sales5/100); i++){
-    cout << "*";
-  }
-  cout << endl;
+      cout << "Store 1: ";
+      for(int i = 0; i < (sales1/100); i++){
+        cout << "*";
+      }
+      cout << "\nStore 2: ";
+      for(int i = 0; i < (sales2/100); i++){
+        cout << "*";
+      }
+      cout << "\nStore 3: ";
+      for(int i = 0; i < (sales3/100); i++){
+        cout << "*";
+      }
+      cout << "\nStore 4: ";
+      for(int i = 0; i < (sales4/100); i++){
+        cout << "*";
+      }
+      cout << "\nStore 5: ";
+      for(int i = 0; i < (sales5/100); i++){
+        cout << "*";
+      }
+      cout << endl;
 
-  return 0;
+      return 0;
+  }
+  else{
+    cout << "Please, you must enter positive numbers\n";
+  }
 }

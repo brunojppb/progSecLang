@@ -1,3 +1,10 @@
+/*
+    PROGRAM: question09.CPP
+    Written by Bruno Paulino
+    This program calculates the number of calories burned in a running
+*/
+
+
 #include <iostream>
 using namespace std;
 

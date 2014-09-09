@@ -1,3 +1,8 @@
+/*
+    PROGRAM: question06.CPP
+    Written by Bruno Paulino
+    This program calculates the speed of sound in gases.
+*/
 #include <iostream>
 using namespace std;
 
@@ -18,11 +23,11 @@ int main(){
     cout << "4 - Hydrogen\n";
 
     cin >> option;
-    if(option >= 1 && option <= 4){
+    if((option >= 1) && (option <= 4)){
 
       cout << "Enter the number of seconds: ";
       cin >> seconds;
-      if(seconds >= 0 && seconds <= 30){
+      if((seconds >= 0) && (seconds <= 30)){
 
         switch(option){
 

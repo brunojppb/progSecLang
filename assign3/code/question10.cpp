@@ -1,3 +1,9 @@
+/*
+    PROGRAM: question10.CPP
+    Written by Bruno Paulino
+    This program calculates the long-distance carrier charges for telefones calls
+*/
+
 #include <iostream>
 using namespace std;
 

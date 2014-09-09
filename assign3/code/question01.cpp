@@ -1,3 +1,8 @@
+/*
+    PROGRAM: question01.CPP
+    Written by Bruno Paulino
+    This program displays the roman numeral version of that number.
+*/
 #include <iostream>
 using namespace std;
 
@@ -8,10 +13,7 @@ int main(){
   cout << "Enter a number within a range of 1 through 10: ";
   cin >> number;
 
-  if(number < 1 || number > 10){
-    cout << "Wrong number!\n";
-  }
-  else{
+  if((number >= 1) && (number <= 10)){
     cout << "The Roman numeral version of the " << number << " is ";
     switch(number){
 
@@ -58,6 +60,9 @@ int main(){
       default:
         break;
     }
+  }
+  else{
+    cout << "Wrong number! You must enter a number between 1 and 10\n";
   }
 
 }

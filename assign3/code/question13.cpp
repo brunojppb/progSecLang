@@ -1,3 +1,9 @@
+/*
+    PROGRAM: question13.CPP
+    Written by Bruno Paulino
+    This program reads a file and creates a Population Bar Chart
+*/
+
 #include <iostream>
 #include <fstream>
 #include <string>
