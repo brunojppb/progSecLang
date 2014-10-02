@@ -1,0 +1,201 @@
+//
+//  main.cpp
+//  Image
+//
+//  Created by Bruno Paulino on 9/30/14.
+//  Copyright (c) 2014 Bruno Paulino. All rights reserved.
+//
+
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+//CONSTANTS
+const unsigned int HEIGHT = 418;
+const unsigned int WIDTH  = 312;
+
+//==============================================
+//STRUCTS
+//==============================================
+struct Image{
+    string fileName;
+    unsigned char pixelmap[HEIGHT][WIDTH];
+    unsigned int width;
+    unsigned int height;
+};
+
+struct Frame{
+    Image image;
+    struct Frame *next;
+};
+
+//Head
+Frame *head = NULL;
+
+
+//===============================================
+//PROTOTYPES
+//===============================================
+
+bool isEmpty(Frame *head);
+void showFrameList(Frame *head);
+Frame* createNewFrame(const unsigned int imageHeight,
+                      const unsigned int imageWidth,
+                      const string fileName,
+                      Frame **head);
+
+int showMenu();
+void loadVideo();
+int intLength(int number);
+
+
+//===============================================
+//MAIN
+//===============================================
+int main() {
+    
+//    createNewFrame(HEIGHT, WIDTH, "TESTE1", &head);
+//    createNewFrame(HEIGHT, WIDTH, "TESTE2", &head);
+//    createNewFrame(HEIGHT, WIDTH, "TESTE3", &head);
+//    createNewFrame(HEIGHT, WIDTH, "TESTE4", &head);
+//    showFrameList(head);
+    
+    int option = showMenu();
+    
+    switch (option) {
+        case 1:
+            loadVideo();
+            break;
+            
+        default:
+            break;
+    }
+    
+    
+    return 0;
+}
+
+
+//===============================================
+//FUNCTIONS
+//===============================================
+
+bool isEmpty(Frame *head){
+    if (head == NULL)
+        return true;
+    else
+        return false;
+}
+
+Frame* createNewFrame(const unsigned int imageHeight,
+                 const unsigned int imageWidth,
+                 const string fileName,
+                 Frame **head){
+    
+    Frame *newFrame = new Frame;
+
+    if(isEmpty(*head)){
+        newFrame->image.height = imageHeight;
+        newFrame->image.width = imageWidth;
+        newFrame->image.fileName = fileName;
+        newFrame->next = NULL;
+        *head = newFrame;
+    }
+    else{
+        Frame *currentNode = *head;
+        while (currentNode->next != NULL) {
+            currentNode = currentNode->next;
+        }
+        Frame *newFrame = new Frame;
+        newFrame->image.height = imageHeight;
+        newFrame->image.width = imageWidth;
+        newFrame->image.fileName = fileName;
+        newFrame->next = NULL;
+        currentNode->next = newFrame;
+    }
+    return newFrame;
+}
+
+void showFrameList(Frame *head){
+    Frame *headCopy = head;
+    
+    if (head == NULL) {
+        cout << "HEAD NULL\n";
+    }
+    
+    while (headCopy != NULL) {
+        cout << "Filename: " << headCopy->image.fileName << endl;
+        cout << "Memory Address: " << headCopy << endl;
+        headCopy = headCopy->next;
+    }
+}
+
+int showMenu(){
+    
+    int choice;
+    cout << "1. Load video" << endl;
+    cout << "2. Save video" << endl;
+    cout << "3. Save an image frame" << endl;
+    cout << "4. Delete a image frame" << endl;
+    cout << "5. Calculate the average image frame" << endl;
+    cin >> choice;
+    return choice;
+}
+
+void loadVideo(){
+    
+    for (int imageIndex = 0; imageIndex < 110; imageIndex++) {
+        string filename = "surprise/";
+        if (intLength(imageIndex) == 1) {
+            filename += "00" + to_string(imageIndex);
+        }
+        else if(intLength(imageIndex) == 2){
+            filename += "0" + to_string(imageIndex);
+        }
+        else{
+            filename += to_string(imageIndex);
+        }
+        filename += ".pgm";
+        imageFile.open(filename);
+        cout << "Filename: " << filename << endl;
+        if (imageFile.is_open()) {
+            cout << "file: " << filename << " ok" << endl;
+        }
+        else{
+            cout << "Error: could not open the file" << endl;
+        }
+    }
+    
+}
+
+int intLength(int number){
+    int len = 1;
+    
+    if(number > 0){
+        for(len = 0; number > 0; len++)
+            number = number/10;
+    }
+    
+    return len;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
