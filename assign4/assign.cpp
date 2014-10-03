@@ -13,14 +13,16 @@
 #include <iomanip>
 using namespace std;
 
-//CONSTANTS
-//const unsigned int HEIGHT = 418;
-//const unsigned int WIDTH  = 312;
-//const unsigned int MAX_VALUES = 130416;
+//TEST VALUES
+// const unsigned int HEIGHT = 10;
+// const unsigned int WIDTH  = 10;
+// const unsigned int MAX_VALUES = 100;
 
-const unsigned int HEIGHT = 10;
-const unsigned int WIDTH  = 10;
-const unsigned int MAX_VALUES = 100;
+//CONSTANTS
+const unsigned int HEIGHT = 418;
+const unsigned int WIDTH  = 312;
+const unsigned int MAX_VALUES = 130416;
+const string OUTPUT_FOLDER = "FRAMES_OUTPUT/";
 
 //==============================================
 //STRUCTS
@@ -28,6 +30,7 @@ const unsigned int MAX_VALUES = 100;
 struct Image{
     string fileName;
     unsigned int pixelmap[HEIGHT][WIDTH];
+    unsigned int pixelMax;
     unsigned int width;
     unsigned int height;
 };
@@ -52,13 +55,18 @@ Frame *head = NULL;
 //PROTOTYPES
 //===============================================
 
+//LIST MANIPULATION
 bool isEmpty(Frame *head);
 void showFrameList(Frame *head);
 Frame* createNewFrame(const unsigned int imageHeight,
                       const unsigned int imageWidth,
                       const string fileName,
                       Frame **head);
+void deleteFrame(string filename, Frame *head);
+void saveFrame(string filename, Frame *head);
+void saveVideo(Frame *head);
 
+//MENU OPERATIONS
 int showMenu();
 void loadVideo();
 int intLength(int number);
@@ -69,19 +77,29 @@ void calculateAverage(Frame *head);
 //MAIN
 //===============================================
 int main() {
-    
-    int option = showMenu();
-    
-    switch (option) {
+    string filename;
+    int option = 0;
+
+    while(option != 5){
+
+        option = showMenu();
+
+        switch (option) {
         case 1:
             loadVideo();
             //showFrameList(head);
             calculateAverage(head);
             break;
-            
+        
+        case 2:
+            cout << "enter the filename: ";
+            cin >> filename;
+            saveFrame(filename, head);
+
         default:
             break;
     }
+    };
     
     
     return 0;
@@ -107,7 +125,7 @@ Frame* createNewFrame(const unsigned int imageHeight,
     Frame *newFrame = new Frame;
 
     if(isEmpty(*head)){
-        cout << "Is Empty!!!\n\n";
+        cout << "The head is empty... insert the first node...\n";
         newFrame->image = new Image;
         newFrame->image->height = imageHeight;
         newFrame->image->width = imageWidth;
@@ -116,7 +134,7 @@ Frame* createNewFrame(const unsigned int imageHeight,
         *head = newFrame;
     }
     else{
-        cout << "One more!!!\n\n";
+        cout << "The list already has element(s)... add one more...\n";
         Frame *currentNode = *head;
         while (currentNode->next != NULL) {
             currentNode = currentNode->next;
@@ -170,8 +188,10 @@ void loadVideo(){
         
     ifstream imageFile;
 
-    for (int imageIndex = 0; imageIndex < 5; imageIndex++) {
-        string folder = "test/";
+    for (int imageIndex = 0; imageIndex < 110; imageIndex++) {
+        //TEST Folder
+        //string folder = "test/";
+        string folder = "surprise/";
         string filename = "";
         if (intLength(imageIndex) == 1) {
             filename += "00" + to_string(imageIndex);
@@ -204,17 +224,20 @@ void loadVideo(){
             stringstream ss;
             //count how many number are in the file
             int count = 0;
+            //store the max value of the matrix
+            int pixelmax = 0;
             while(getline(imageFile, line)){
                 trim(line);
                 ss << line;
                 while(ss.good()){
                     int num;
                     ss >> num;
-                    //cout << num << " ";
                     temp[count] = num;
                     count++;
+                    //obtain the maximum value of the matrix (pixels)
+                    if(num > pixelmax)
+                        pixelmax = num;
                 }
-                //cout << endl;
                 ss.clear();
             }
 
@@ -227,13 +250,16 @@ void loadVideo(){
                     count++;
                 }
             }
+
+            frame->image->pixelMax = pixelmax;
+
             //output the matrix (debug)
-            for(int i = 0; i < HEIGHT; i++){
-                for(int j = 0; j < WIDTH; j++){
-                    cout << frame->image->pixelmap[i][j] << " ";
-                }
-                cout << endl;
-            }   
+            // for(int i = 0; i < HEIGHT; i++){
+            //     for(int j = 0; j < WIDTH; j++){
+            //         cout << frame->image->pixelmap[i][j] << " ";
+            //     }
+            //     cout << endl;
+            // }   
 
             //close the file         
             imageFile.close();
@@ -282,7 +308,6 @@ void calculateAverage(Frame *head){
     int nodeCount = 0;
     Frame *currentNode = head;
     while(currentNode != NULL){
-        cout << "pass through the list...\n";
         for(int i = 0; i < HEIGHT; i++){
             for(int j = 0; j < WIDTH; j++){
                 avg->pixelmap[i][j] += currentNode->image->pixelmap[i][j];
@@ -293,30 +318,90 @@ void calculateAverage(Frame *head){
     }
 
     //show the avg matrix before the avg calc.
-    cout << "Avg matrix before the avg calc.\n";
-    for(int i = 0; i < HEIGHT; i++){
-        for(int j = 0; j < WIDTH; j++){
-            cout << avg->pixelmap[i][j] << " ";
-        }
-        cout << endl;
-    }
+    // cout << "Avg matrix before the avg calc.\n";
+    // for(int i = 0; i < HEIGHT; i++){
+    //     for(int j = 0; j < WIDTH; j++){
+    //         cout << avg->pixelmap[i][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
 
     //divide each element by the matrices quantity
     for(int i = 0; i < HEIGHT; i++){
         for(int j = 0; j < WIDTH; j++){
-            avg->pixelmap[i][j] = static_cast<double>(avg->pixelmap[i][j]) / nodeCount;
+            avg->pixelmap[i][j] = static_cast<float>(avg->pixelmap[i][j]) / static_cast<float>(nodeCount);
         }
     }
 
     //show the avg image
-    cout << "Avg matrix:\n";
-    cout << fixed << setprecision(4);
-    for(int i = 0; i < HEIGHT; i++){
-        for(int j = 0; j < WIDTH; j++){
-            cout << setw(8) << avg->pixelmap[i][j] << " ";
-        }
-        cout << endl;
+    // cout << "Avg matrix:\n";
+    // cout << setprecision(4);
+    // for(int i = 0; i < HEIGHT; i++){
+    //     for(int j = 0; j < WIDTH; j++){
+    //         cout << setw(8) << avg->pixelmap[i][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
+}
+
+void deleteFrame(string filename, Frame *head){
+
+}
+
+void saveFrame(string filename, Frame *head){
+    if(isEmpty(head)){
+        cout << "No video loaded... Please, load the video first...\n";
+        return;
     }
+
+    Frame *searchFrame = NULL;
+
+    Frame *currentNode = head;
+    while(currentNode != NULL){
+
+        if(filename.compare(currentNode->image->fileName) == 0){
+            searchFrame = currentNode;
+            break;
+        }
+
+        currentNode = currentNode->next;
+    }
+
+    if (searchFrame == NULL){
+        cout << "There is no frame named " << filename << endl;
+        return;    
+    }
+
+    ofstream imageFile;
+    string path = OUTPUT_FOLDER + "OUT_" + searchFrame->image->fileName;
+    imageFile.open(path);
+    if(imageFile.is_open()){
+
+        imageFile << "P2\n";
+        imageFile << WIDTH << " " << HEIGHT << "\n";
+        imageFile << searchFrame->image->pixelMax << "\n";
+
+        for(int i = 0; i < HEIGHT; i++){
+            for(int j = 0; j < WIDTH; j++){
+                imageFile << searchFrame->image->pixelmap[i][j] << " ";
+                if(j % 10 == 0 && j != 0)
+                    cout << "\n";
+            }
+        }
+
+        //close the file
+        imageFile.close();
+
+
+    }
+    else{
+        cout << "Error: could not open the file...\n";
+    }
+}
+
+
+
+void saveVideo(Frame *head){
 
 }
 
