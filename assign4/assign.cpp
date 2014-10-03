@@ -17,13 +17,16 @@ using namespace std;
 // const unsigned int HEIGHT = 10;
 // const unsigned int WIDTH  = 10;
 // const unsigned int MAX_VALUES = 100;
+// const unsigned int NUMBER_OF_FRAMES = 5;
 
 //CONSTANTS
 const unsigned int HEIGHT = 418;
 const unsigned int WIDTH  = 312;
 const unsigned int MAX_VALUES = 130416;
+const unsigned int NUMBER_OF_FRAMES = 109;
 const string FRAME_OUTPUT_FOLDER = "OUTPUT_FRAME/";
 const string VIDEO_OUTPUT_FOLDER = "OUTPUT_VIDEO/";
+const string AVG_OUTPUT_FOLDER = "OUTPUT_AVG/";
 
 //==============================================
 //STRUCTS
@@ -39,6 +42,7 @@ struct Image{
 struct AverageImage{
     string fileName;
     double pixelmap[HEIGHT][WIDTH];
+    double pixelMax;
     unsigned int width;
     unsigned int height;  
 };
@@ -81,7 +85,7 @@ int main() {
     string filename;
     int option = 0;
 
-    while(option != 5){
+    while(option != 6){
 
         option = showMenu();
 
@@ -91,19 +95,30 @@ int main() {
             //showFrameList(head);
             calculateAverage(head);
             break;
-        
+
         case 2:
-            cout << "enter the filename: ";
+            saveVideo(head);
+            break;
+        
+        case 3:
+            cout << "enter the name of the frame: ";
             cin >> filename;
             saveFrame(filename, FRAME_OUTPUT_FOLDER, head);
             break;
 
-        case 3:
-            saveVideo(head);
+        case 4:
+            cout << "enter the name of the frame to be deleted: ";
+            cin >> filename;
+            deleteFrame(filename, head);
+            break;
+
+        case 5:
+            calculateAverage(head);
+            break;
 
         default:
             break;
-    }
+        }
     };
     
     
@@ -193,7 +208,7 @@ void loadVideo(){
         
     ifstream imageFile;
 
-    for (int imageIndex = 0; imageIndex < 110; imageIndex++) {
+    for (int imageIndex = 0; imageIndex < NUMBER_OF_FRAMES; imageIndex++) {
         //TEST Folder
         //string folder = "test/";
         string folder = "surprise/";
@@ -322,35 +337,43 @@ void calculateAverage(Frame *head){
         currentNode = currentNode->next;
     }
 
-    //show the avg matrix before the avg calc.
-    // cout << "Avg matrix before the avg calc.\n";
-    // for(int i = 0; i < HEIGHT; i++){
-    //     for(int j = 0; j < WIDTH; j++){
-    //         cout << avg->pixelmap[i][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
-
     //divide each element by the matrices quantity
+    double avgPixelMax = 0;
     for(int i = 0; i < HEIGHT; i++){
         for(int j = 0; j < WIDTH; j++){
             avg->pixelmap[i][j] = static_cast<float>(avg->pixelmap[i][j]) / static_cast<float>(nodeCount);
+            if(avg->pixelmap[i][j] > avgPixelMax)
+                avgPixelMax = avg->pixelmap[i][j];
         }
     }
+    avg->pixelMax =avgPixelMax;
 
-    //show the avg image
-    // cout << "Avg matrix:\n";
-    // cout << setprecision(4);
-    // for(int i = 0; i < HEIGHT; i++){
-    //     for(int j = 0; j < WIDTH; j++){
-    //         cout << setw(8) << avg->pixelmap[i][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
-}
+    ofstream imageFile;
+    string path = AVG_OUTPUT_FOLDER + avg->fileName;
+    imageFile.open(path);
+    if(imageFile.is_open()){
 
-void deleteFrame(string filename, Frame *head){
+        imageFile << "P2\n";
+        imageFile << WIDTH << " " << HEIGHT << "\n";
+        imageFile << avg->pixelMax << "\n";
 
+        for(int i = 0; i < HEIGHT; i++){
+            for(int j = 0; j < WIDTH; j++){
+                if(j % 10 == 0 && j != 0)
+                    imageFile << "\n";
+                imageFile << avg->pixelmap[i][j] << " ";
+            }
+            imageFile << "\n";
+        }
+
+        //close the file
+        imageFile.close();
+
+
+    }
+    else{
+        cout << "Error: could not open the file...\n";
+    }
 }
 
 void saveFrame(string filename, string folder, Frame *head){
@@ -421,7 +444,38 @@ void saveVideo(Frame *head){
     else{
         cout << "No video loaded... Please, load the video first...\n";
     }
+}
 
+void deleteFrame(string filename, Frame *head){
+    if(isEmpty(head)){
+        cout << "No video loaded... Please, load the video first...\n";
+        return;
+    }
+    Frame *nodeToRemove = NULL;
+    Frame *nodeBefore = NULL;
+    Frame *nodeAfter = NULL;
+    Frame *currentNode = head;
+
+    bool found = false;
+
+    while(currentNode != NULL){
+
+        if(currentNode->next->image->fileName.compare(filename) == 0){
+            nodeBefore = currentNode;
+            nodeToRemove = currentNode->next;
+            nodeAfter = currentNode->next->next;
+            delete nodeToRemove;
+            nodeBefore->next = nodeAfter;
+            found = true;
+            break;
+        }
+
+        currentNode = currentNode->next;
+    };
+
+    if(!found){
+        cout << "There is no frame named " << filename << " inside the list.\n";
+    }
 }
 
 
