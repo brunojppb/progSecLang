@@ -22,7 +22,8 @@ using namespace std;
 const unsigned int HEIGHT = 418;
 const unsigned int WIDTH  = 312;
 const unsigned int MAX_VALUES = 130416;
-const string OUTPUT_FOLDER = "FRAMES_OUTPUT/";
+const string FRAME_OUTPUT_FOLDER = "OUTPUT_FRAME/";
+const string VIDEO_OUTPUT_FOLDER = "OUTPUT_VIDEO/";
 
 //==============================================
 //STRUCTS
@@ -63,7 +64,7 @@ Frame* createNewFrame(const unsigned int imageHeight,
                       const string fileName,
                       Frame **head);
 void deleteFrame(string filename, Frame *head);
-void saveFrame(string filename, Frame *head);
+void saveFrame(string filename, string folder, Frame *head);
 void saveVideo(Frame *head);
 
 //MENU OPERATIONS
@@ -94,7 +95,11 @@ int main() {
         case 2:
             cout << "enter the filename: ";
             cin >> filename;
-            saveFrame(filename, head);
+            saveFrame(filename, FRAME_OUTPUT_FOLDER, head);
+            break;
+
+        case 3:
+            saveVideo(head);
 
         default:
             break;
@@ -125,7 +130,7 @@ Frame* createNewFrame(const unsigned int imageHeight,
     Frame *newFrame = new Frame;
 
     if(isEmpty(*head)){
-        cout << "The head is empty... insert the first node...\n";
+        //cout << "The head is empty... insert the first node...\n";
         newFrame->image = new Image;
         newFrame->image->height = imageHeight;
         newFrame->image->width = imageWidth;
@@ -134,7 +139,7 @@ Frame* createNewFrame(const unsigned int imageHeight,
         *head = newFrame;
     }
     else{
-        cout << "The list already has element(s)... add one more...\n";
+        //cout << "The list already has element(s)... add one more...\n";
         Frame *currentNode = *head;
         while (currentNode->next != NULL) {
             currentNode = currentNode->next;
@@ -348,12 +353,11 @@ void deleteFrame(string filename, Frame *head){
 
 }
 
-void saveFrame(string filename, Frame *head){
+void saveFrame(string filename, string folder, Frame *head){
     if(isEmpty(head)){
         cout << "No video loaded... Please, load the video first...\n";
         return;
     }
-
     Frame *searchFrame = NULL;
 
     Frame *currentNode = head;
@@ -373,7 +377,7 @@ void saveFrame(string filename, Frame *head){
     }
 
     ofstream imageFile;
-    string path = OUTPUT_FOLDER + "OUT_" + searchFrame->image->fileName;
+    string path = folder + "OUT_" + searchFrame->image->fileName;
     imageFile.open(path);
     if(imageFile.is_open()){
 
@@ -383,10 +387,11 @@ void saveFrame(string filename, Frame *head){
 
         for(int i = 0; i < HEIGHT; i++){
             for(int j = 0; j < WIDTH; j++){
-                imageFile << searchFrame->image->pixelmap[i][j] << " ";
                 if(j % 10 == 0 && j != 0)
-                    cout << "\n";
+                    imageFile << "\n";
+                imageFile << searchFrame->image->pixelmap[i][j] << " ";
             }
+            imageFile << "\n";
         }
 
         //close the file
@@ -402,6 +407,20 @@ void saveFrame(string filename, Frame *head){
 
 
 void saveVideo(Frame *head){
+
+    if(!isEmpty(head)){
+        Frame *currentNode = head;
+        int percent = 1;
+        cout << "saving video... please, wait...\n";
+        while(currentNode != NULL){
+            saveFrame(currentNode->image->fileName, VIDEO_OUTPUT_FOLDER, head);
+            percent++;
+            currentNode = currentNode->next;
+        }
+    }
+    else{
+        cout << "No video loaded... Please, load the video first...\n";
+    }
 
 }
 
