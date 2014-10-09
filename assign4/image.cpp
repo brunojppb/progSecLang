@@ -22,7 +22,7 @@ using namespace std;
 //CONSTANTS
 const unsigned int HEIGHT = 418;
 const unsigned int WIDTH  = 312;
-const unsigned int MAX_VALUES = 130416;
+const unsigned int MAX_VALUES = HEIGHT * WIDTH;
 const unsigned int NUMBER_OF_FRAMES = 109;
 const string FRAME_OUTPUT_FOLDER = "OUTPUT_FRAME/";
 const string VIDEO_OUTPUT_FOLDER = "OUTPUT_VIDEO/";
@@ -229,7 +229,7 @@ int showMenu(){
     cout << "1. Load video" << endl;
     cout << "2. Save video" << endl;
     cout << "3. Save an image frame" << endl;
-    cout << "4. Delete a image frame" << endl;
+    cout << "4. Delete an image frame" << endl;
     cout << "5. Calculate the average image frame" << endl;
     cout << "6. Exit"<< endl;
     cin >> choice;
