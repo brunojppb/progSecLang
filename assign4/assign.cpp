@@ -1,5 +1,5 @@
 //
-//  main.cpp
+//  assign.cpp
 //  Image
 //
 //  Created by Bruno Paulino on 9/30/14.
@@ -39,6 +39,8 @@ struct Image{
     unsigned int height;
 };
 
+//The average image needs to be a little bit diferent
+//because the average is a float point number
 struct AverageImage{
     string fileName;
     double pixelmap[HEIGHT][WIDTH];
@@ -52,12 +54,12 @@ struct Frame{
     struct Frame *next;
 };
 
-//Head
+//Head of the list of frames
 Frame *head = NULL;
 
 
 //===============================================
-//PROTOTYPES
+//FUNCTIONS PROTOTYPES
 //===============================================
 
 //LIST MANIPULATION
@@ -67,9 +69,10 @@ Frame* createNewFrame(const unsigned int imageHeight,
                       const unsigned int imageWidth,
                       const string fileName,
                       Frame **head);
-void deleteFrame(string filename, Frame *head);
+void deleteFrame(string filename, Frame **head);
 void saveFrame(string filename, string folder, Frame *head);
 void saveVideo(Frame *head);
+int listLength(Frame *head);
 
 //MENU OPERATIONS
 int showMenu();
@@ -79,7 +82,7 @@ void trim(string &str);
 void calculateAverage(Frame *head);
 
 //===============================================
-//MAIN
+//MAIN FUNCTION
 //===============================================
 int main() {
     string filename;
@@ -92,8 +95,6 @@ int main() {
         switch (option) {
         case 1:
             loadVideo();
-            //showFrameList(head);
-            calculateAverage(head);
             break;
 
         case 2:
@@ -101,15 +102,15 @@ int main() {
             break;
         
         case 3:
-            cout << "enter the name of the frame: ";
+            cout << "enter the name of the frame (e.g. \"005.pgm\"): ";
             cin >> filename;
             saveFrame(filename, FRAME_OUTPUT_FOLDER, head);
             break;
 
         case 4:
-            cout << "enter the name of the frame to be deleted: ";
+            cout << "enter the name of the frame to be deleted (e.g. \"005.pgm\"): ";
             cin >> filename;
-            deleteFrame(filename, head);
+            deleteFrame(filename, &head);
             break;
 
         case 5:
@@ -130,6 +131,9 @@ int main() {
 //FUNCTIONS
 //===============================================
 
+//===============================================
+//tests if the list is empty or not
+//===============================================
 bool isEmpty(Frame *head){
     if (head == NULL)
         return true;
@@ -137,6 +141,9 @@ bool isEmpty(Frame *head){
         return false;
 }
 
+//===============================================
+//Create a new Frame and inserts in the list
+//===============================================
 Frame* createNewFrame(const unsigned int imageHeight,
                  const unsigned int imageWidth,
                  const string fileName,
@@ -169,6 +176,9 @@ Frame* createNewFrame(const unsigned int imageHeight,
     return newFrame;
 }
 
+//===============================================
+//Shows the frames stored in the memory (List)
+//===============================================
 void showFrameList(Frame *head){
     Frame *headCopy = head;
     
@@ -192,6 +202,27 @@ void showFrameList(Frame *head){
     }
 }
 
+//===============================================================
+//Calculates the length of the list (How many frames in the list)
+//===============================================================
+int listLength(Frame *head){
+    if (head == NULL)
+    {
+        return 0;
+    }
+
+    Frame *node = head;
+    int count = 0;
+    while(node != NULL){
+        node = node->next;
+        count++;
+    }
+    return count;
+}
+
+//===============================================================
+//Show the main menu
+//===============================================================
 int showMenu(){
     
     int choice;
@@ -200,18 +231,24 @@ int showMenu(){
     cout << "3. Save an image frame" << endl;
     cout << "4. Delete a image frame" << endl;
     cout << "5. Calculate the average image frame" << endl;
+    cout << "6. Exit"<< endl;
     cin >> choice;
     return choice;
 }
 
+//===============================================================
+//Load frames from the hard disk and store in the memory
+//===============================================================
 void loadVideo(){
-        
+    
+    //save each frame in a single file(Image File)
     ifstream imageFile;
 
-    for (int imageIndex = 0; imageIndex < NUMBER_OF_FRAMES; imageIndex++) {
-        //TEST Folder
-        //string folder = "test/";
-        string folder = "surprise/";
+    string folder;
+    cout << "Enter the name of the video: ";
+    cin >> folder;
+
+    for (int imageIndex = 0; imageIndex <= NUMBER_OF_FRAMES; imageIndex++) {
         string filename = "";
         if (intLength(imageIndex) == 1) {
             filename += "00" + to_string(imageIndex);
@@ -223,7 +260,7 @@ void loadVideo(){
             filename += to_string(imageIndex);
         }
         filename += ".pgm";
-        imageFile.open(folder + filename);
+        imageFile.open(folder + "/" + filename);
         
         //try to open the file
         if (imageFile.is_open()) {
@@ -234,27 +271,33 @@ void loadVideo(){
             getline(imageFile, line);
             //jump the height and width of the matrix
             getline(imageFile, line);
-            //jump the higher pixel
+            //jump the maximum pixel
             getline(imageFile, line);
 
             //temporary array to store the numbers
             int temp[MAX_VALUES];
 
-            //reading each line and converts the string to numbers
+            //to read each line of the file and converts the string to numbers
+            //we have to extract each string from the stringstream
             stringstream ss;
-            //count how many number are in the file
+            //count how many numbers are in the file
             int count = 0;
             //store the max value of the matrix
             int pixelmax = 0;
             while(getline(imageFile, line)){
+                //remove spaces before and after the string
                 trim(line);
+                //extract the content of the line variable
                 ss << line;
+                //while ss has content to be converted
+                //keep converting
                 while(ss.good()){
                     int num;
+                    //extract and convert the string to int
                     ss >> num;
                     temp[count] = num;
                     count++;
-                    //obtain the maximum value of the matrix (pixels)
+                    //obtain the maximum value of the matrix (pixel)
                     if(num > pixelmax)
                         pixelmax = num;
                 }
@@ -273,17 +316,10 @@ void loadVideo(){
 
             frame->image->pixelMax = pixelmax;
 
-            //output the matrix (debug)
-            // for(int i = 0; i < HEIGHT; i++){
-            //     for(int j = 0; j < WIDTH; j++){
-            //         cout << frame->image->pixelmap[i][j] << " ";
-            //     }
-            //     cout << endl;
-            // }   
-
             //close the file         
             imageFile.close();
         }
+        //error trying to open the file
         else{
             cout << "Error: could not open the file" << endl;
         }
@@ -291,7 +327,9 @@ void loadVideo(){
     
 }
 
+//================================================================================
 //calculates how many decimal places a integer number has
+//================================================================================
 int intLength(int number){
     int len = 1;
     
@@ -303,7 +341,9 @@ int intLength(int number){
     return len;
 }
 
+//================================================================================
 //remove the spaces before and after the string
+//================================================================================
 void trim(string &str){
     string::size_type pos1 = str.find_first_not_of(' ');
     string::size_type pos2 = str.find_last_not_of(' ');
@@ -311,13 +351,16 @@ void trim(string &str){
     pos2 == string::npos ? str.length() - 1 : pos2 - pos1 + 1);
 }
 
+//================================================================================
+// Calculates the average image and save in the folder named "OUTPUT_AVG"
+//================================================================================
 void calculateAverage(Frame *head){
     AverageImage *avg = new AverageImage;
     avg->fileName = "average_image.pgm";
     avg->width = WIDTH;
     avg->height = HEIGHT;
 
-    //fill up the pixelmap with 0
+    //fill up the pixelmap matrix with 0
     for(int i = 0; i < HEIGHT; i++){
         for(int j = 0; j < WIDTH; j++){
             avg->pixelmap[i][j] = 0;
@@ -337,7 +380,7 @@ void calculateAverage(Frame *head){
         currentNode = currentNode->next;
     }
 
-    //divide each element by the matrices quantity
+    //divide each element of the matrix by the matrices number
     double avgPixelMax = 0;
     for(int i = 0; i < HEIGHT; i++){
         for(int j = 0; j < WIDTH; j++){
@@ -346,6 +389,7 @@ void calculateAverage(Frame *head){
                 avgPixelMax = avg->pixelmap[i][j];
         }
     }
+    //store the maximum pixel of the average image
     avg->pixelMax =avgPixelMax;
 
     ofstream imageFile;
@@ -353,10 +397,14 @@ void calculateAverage(Frame *head){
     imageFile.open(path);
     if(imageFile.is_open()){
 
+        //write the magic number
         imageFile << "P2\n";
+        //write the width and height of the matrix
         imageFile << WIDTH << " " << HEIGHT << "\n";
+        //write the maximum pixel
         imageFile << avg->pixelMax << "\n";
 
+        //write the matrix on the file following the pattern of the original file
         for(int i = 0; i < HEIGHT; i++){
             for(int j = 0; j < WIDTH; j++){
                 if(j % 10 == 0 && j != 0)
@@ -368,7 +416,7 @@ void calculateAverage(Frame *head){
 
         //close the file
         imageFile.close();
-
+        cout << "Average Frame saved in the folder named \"OUTPUT_AVG\".\n";
 
     }
     else{
@@ -376,6 +424,9 @@ void calculateAverage(Frame *head){
     }
 }
 
+//================================================================================
+// Save a especific frame in the folder named "OUTPUT_FRAME"
+//================================================================================
 void saveFrame(string filename, string folder, Frame *head){
     if(isEmpty(head)){
         cout << "No video loaded... Please, load the video first...\n";
@@ -428,73 +479,96 @@ void saveFrame(string filename, string folder, Frame *head){
 }
 
 
-
+//========================================================================================
+// Save the video (all the frames stored in the memory) in the folder named "OUTPUT_VIDEO"
+//========================================================================================
 void saveVideo(Frame *head){
 
     if(!isEmpty(head)){
         Frame *currentNode = head;
-        int percent = 1;
         cout << "saving video... please, wait...\n";
         while(currentNode != NULL){
             saveFrame(currentNode->image->fileName, VIDEO_OUTPUT_FOLDER, head);
-            percent++;
             currentNode = currentNode->next;
         }
+        cout << "Video saved in the folder named \"OUTPUT_VIDEO...\"\n\n";
     }
     else{
-        cout << "No video loaded... Please, load the video first...\n";
+        cout << "No video loaded... Please, load the video...\n";
     }
 }
 
-void deleteFrame(string filename, Frame *head){
-    if(isEmpty(head)){
-        cout << "No video loaded... Please, load the video first...\n";
+//========================================================================================
+// Delete from the list an especific frame
+//========================================================================================
+void deleteFrame(string filename, Frame **head){
+    if(isEmpty(*head)){
+        cout << "No video loaded... Please, load the video...\n";
         return;
     }
     Frame *nodeToRemove = NULL;
     Frame *nodeBefore = NULL;
     Frame *nodeAfter = NULL;
-    Frame *currentNode = head;
+    Frame *currentNode = *head;
+    int index = 0;
 
     bool found = false;
 
+    //To remove nodes from the single linked list we have 3 especific cases:
+    //
+    //    - Remove the first node of the list
+    //    - Remove a node between two nodes
+    //    - Remove the last node of the list
+    //
     while(currentNode != NULL){
-
-        if(currentNode->next->image->fileName.compare(filename) == 0){
-            nodeBefore = currentNode;
-            nodeToRemove = currentNode->next;
-            nodeAfter = currentNode->next->next;
-            delete nodeToRemove;
-            nodeBefore->next = nodeAfter;
+        index++;
+        if(currentNode->image->fileName.compare(filename) == 0){
             found = true;
+            nodeToRemove = currentNode;
+            //===================================================
+            //FIRST CASE
+            //===================================================
+            //We need to remove the first node of the list
+            if(index == 1){
+                *head = currentNode->next;
+                delete nodeToRemove;
+            }
+            //===================================================
+            //SECOND CASE
+            //===================================================
+            //we need to remove the last node of the list
+            else if(index == listLength(*head)){
+                nodeBefore = *head;
+                //store the reference of the node before the node to remove
+                while(nodeBefore->next->image->fileName.compare(nodeToRemove->image->fileName) != 0)
+                    nodeBefore = nodeBefore->next;
+                nodeBefore->next = NULL;
+                delete nodeToRemove;
+            }
+            //===================================================
+            //THIRD CASE
+            //===================================================
+            //we need to remove a node between two nodes
+            else{
+                nodeBefore = *head;
+                //store the reference of the node before the node to remove
+                while(nodeBefore->next->image->fileName.compare(nodeToRemove->image->fileName) != 0)
+                    nodeBefore = nodeBefore->next;
+                nodeAfter = nodeToRemove->next;
+                delete nodeToRemove;
+                nodeBefore->next = nodeAfter;
+            }
+            //stop the while loop
             break;
         }
 
+        //jump to the next node
         currentNode = currentNode->next;
     };
 
     if(!found){
         cout << "There is no frame named " << filename << " inside the list.\n";
+    }else{
+        cout << "Frame " << filename << " deleted...\n\n";
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
