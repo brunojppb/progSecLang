@@ -1,10 +1,10 @@
 //
-//  assign.cpp
-//  Image
 //
 //  Created by Bruno Paulino on 9/30/14.
 //  Copyright (c) 2014 Bruno Paulino. All rights reserved.
 //
+//This program loads a sequence of images and calculates the average image
+//also save delete images from memory and save the images in the hard disk
 
 #include <iostream>
 #include <fstream>
@@ -102,12 +102,20 @@ int main() {
             break;
         
         case 3:
+            if(isEmpty(head)){
+                cout << "Please, load the video...\n";
+                break;
+            }
             cout << "enter the name of the frame (e.g. \"005.pgm\"): ";
             cin >> filename;
             saveFrame(filename, FRAME_OUTPUT_FOLDER, head);
             break;
 
         case 4:
+            if(isEmpty(head)){
+                cout << "Please, load the video...\n";
+                break;
+            }
             cout << "enter the name of the frame to be deleted (e.g. \"005.pgm\"): ";
             cin >> filename;
             deleteFrame(filename, &head);
@@ -117,7 +125,12 @@ int main() {
             calculateAverage(head);
             break;
 
+        case 6:
+            cout << "Thank you...\n";
+            break;
+
         default:
+            cout << "Choose a valid option.\n";
             break;
         }
     };
@@ -148,32 +161,38 @@ Frame* createNewFrame(const unsigned int imageHeight,
                  const unsigned int imageWidth,
                  const string fileName,
                  Frame **head){
-    
-    Frame *newFrame = new Frame;
+    try{
 
-    if(isEmpty(*head)){
-        //cout << "The head is empty... insert the first node...\n";
-        newFrame->image = new Image;
-        newFrame->image->height = imageHeight;
-        newFrame->image->width = imageWidth;
-        newFrame->image->fileName = fileName;
-        newFrame->next = NULL;
-        *head = newFrame;
-    }
-    else{
-        //cout << "The list already has element(s)... add one more...\n";
-        Frame *currentNode = *head;
-        while (currentNode->next != NULL) {
-            currentNode = currentNode->next;
+        Frame *newFrame = new Frame;
+
+        //INSERT THE FIRST NODE OF THE LIST
+        if(isEmpty(*head)){
+            newFrame->image = new Image;
+            newFrame->image->height = imageHeight;
+            newFrame->image->width = imageWidth;
+            newFrame->image->fileName = fileName;
+            newFrame->next = NULL;
+            *head = newFrame;
         }
-        newFrame->image = new Image;
-        newFrame->image->height = imageHeight;
-        newFrame->image->width = imageWidth;
-        newFrame->image->fileName = fileName;
-        newFrame->next = NULL;
-        currentNode->next = newFrame;
+        //INSERT THE NEW NODE AT THE END OF THE LIST
+        else{
+            Frame *currentNode = *head;
+            while (currentNode->next != NULL) {
+                currentNode = currentNode->next;
+            }
+            newFrame->image = new Image;
+            newFrame->image->height = imageHeight;
+            newFrame->image->width = imageWidth;
+            newFrame->image->fileName = fileName;
+            newFrame->next = NULL;
+            currentNode->next = newFrame;
+        }
+        return newFrame;
     }
-    return newFrame;
+    catch(bad_alloc){
+        cout << "Insufficient memory. Plese, close other programs or buy more memory\n";
+        return NULL;
+    }
 }
 
 //===============================================
@@ -183,20 +202,12 @@ void showFrameList(Frame *head){
     Frame *headCopy = head;
     
     if (head == NULL) {
-        cout << "HEAD NULL\n";
+        cout << "The List is empty.\n";
     }
     
     while (headCopy != NULL) {
         cout << "Filename: " << headCopy->image->fileName << endl;
         cout << "Memory Address: " << headCopy << endl;
-        cout << "pixelmap:\n";
-        //output the matrix (debug)
-        for(int i = 0; i < HEIGHT; i++){
-            for(int j = 0; j < WIDTH; j++){
-                cout << headCopy->image->pixelmap[i][j] << " ";
-            }
-            cout << endl;
-        }
         headCopy = headCopy->next;
 
     }
@@ -355,6 +366,10 @@ void trim(string &str){
 // Calculates the average image and save in the folder named "OUTPUT_AVG"
 //================================================================================
 void calculateAverage(Frame *head){
+    if(isEmpty(head)){
+        cout << "Please, load the video...\n";
+        return;
+    }
     AverageImage *avg = new AverageImage;
     avg->fileName = "average_image.pgm";
     avg->width = WIDTH;
@@ -491,7 +506,7 @@ void saveVideo(Frame *head){
             saveFrame(currentNode->image->fileName, VIDEO_OUTPUT_FOLDER, head);
             currentNode = currentNode->next;
         }
-        cout << "Video saved in the folder named \"OUTPUT_VIDEO...\"\n\n";
+        cout << "Video saved in the folder named \"OUTPUT_VIDEO\".\n\n";
     }
     else{
         cout << "No video loaded... Please, load the video...\n";
